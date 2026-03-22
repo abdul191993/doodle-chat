@@ -5,30 +5,10 @@ import { useUser } from "@/context/user.context";
 import MessagesWrapper from "../components/messages-wrapper.component";
 import MessageComposer from "../components/message-composer.component";
 import NameModal from "../components/name.modal";
+import { mergeUniqueMessages } from "../utils/message-helpers";
 import { useMessagesInfiniteQuery } from "../services/messages/messages.query";
 
-import type { TMessage } from "../models/messages.model";
-
 const LATEST_MESSAGES_LIMIT = 10;
-
-const sortMessagesByCreatedAt = (messages: TMessage[]) =>
-  [...messages].sort(
-    (a, b) =>
-      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-  );
-
-const mergeUniqueMessages = (
-  currentMessages: TMessage[],
-  incomingMessages: TMessage[]
-) => {
-  const merged = [...currentMessages, ...incomingMessages];
-
-  const uniqueMessages = merged.filter((message, index, self) => {
-    return index === self.findIndex((item) => item._id === message._id);
-  });
-
-  return sortMessagesByCreatedAt(uniqueMessages);
-};
 
 function ChatPage() {
   const { name } = useUser();
@@ -39,7 +19,6 @@ function ChatPage() {
     isLoading,
     isError,
     error,
-    refetch,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
@@ -52,8 +31,7 @@ function ChatPage() {
     return mergeUniqueMessages([], allMessages);
   }, [data]);
 
-  const handleMessageSent = async () => {
-    await refetch();
+  const handleMessageSent = () => {
     setScrollToBottomSignal((value) => value + 1);
   };
 

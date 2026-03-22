@@ -69,7 +69,7 @@ const MessagesWrapper = ({
     }
 
     container.scrollTop = container.scrollHeight;
-  }, [scrollToBottomSignal]);
+  }, [scrollToBottomSignal, messages]);
 
   return (
     <section

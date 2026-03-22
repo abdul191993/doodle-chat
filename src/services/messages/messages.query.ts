@@ -1,15 +1,10 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { getMessages } from "./messages.service";
 import { messageKeys } from "./messages.keys";
+import { sortMessagesByCreatedAt } from "../../utils/message-helpers";
 import type { TGetMessagesParams, TMessage } from "../../models/messages.model";
 
 const INITIAL_MESSAGES_CURSOR = null;
-
-const sortMessagesByCreatedAt = (messages: TMessage[]) =>
-  [...messages].sort(
-    (a, b) =>
-      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-  );
 
 const getNextPageParam = (lastPage: TMessage[], limit?: number) => {
   if (!lastPage.length) {
