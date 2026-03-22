@@ -17,7 +17,7 @@ function MessageComposer({ currentUser }: MessageComposerProps) {
           <input
             id="message-input"
             type="text"
-            placeholder={`Message as ${currentUser}`}
+            placeholder={`Message as ${currentUser || "Guest"}`}
             autoComplete="off"
             className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm outline-none placeholder:text-gray-400 focus:border-gray-400"
           />

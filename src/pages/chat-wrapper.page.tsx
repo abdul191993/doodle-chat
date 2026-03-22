@@ -1,6 +1,8 @@
 import bgImage from "@/assets/background.png";
-
-const currentUser = "Ahsan";
+import MessageComposer from "@/components/message-composer.component";
+import MessagesWrapper from "@/components/messages-wrapper.component";
+import NameModal from "@/components/name.modal";
+import { useUser } from "@/context/user.context";
 
 const dummyMessages = [
   {
@@ -17,7 +19,7 @@ const dummyMessages = [
   },
   {
     _id: "3",
-    author: currentUser,
+    author: "Ahsan",
     message: "Got it. I’ll rebuild the UI first.",
     createdAt: "22 Mar 2026 10:12",
   },
@@ -29,7 +31,9 @@ const dummyMessages = [
   },
 ];
 
-function ChatPage() {
+function ChatWrapperPage() {
+  const { name } = useUser();
+
   return (
     <main
       aria-label="Doodle Chat conversation"
@@ -49,86 +53,19 @@ function ChatPage() {
               Doodle Chat
             </p>
             <p className="text-xs text-[#667781]">
-              Frontend challenge preview
+              {name ? `Chatting as ${name}` : "Frontend challenge"}
             </p>
           </div>
         </div>
       </header>
 
-      <section
-        aria-label="Messages"
-        className="flex-1 overflow-y-auto px-4 py-6 sm:px-6"
-      >
-        <div className="mx-auto flex w-full max-w-3xl flex-col gap-3">
-          <ol className="flex flex-col gap-2" role="list">
-            {dummyMessages.map((message) => {
-              const isOwnMessage = message.author === currentUser;
+      <NameModal />
 
-              return (
-                <li
-                  key={message._id}
-                  className={`flex ${
-                    isOwnMessage ? "justify-end" : "justify-start"
-                  }`}
-                >
-                  <article
-                    className={[
-                      "max-w-[85%] rounded-lg px-3 py-2 shadow-sm sm:max-w-[70%]",
-                      isOwnMessage ? "bg-[#d9fdd3]" : "bg-white",
-                    ].join(" ")}
-                  >
-                    {!isOwnMessage && (
-                      <p className="mb-1 text-xs font-semibold text-[#667781]">
-                        {message.author}
-                      </p>
-                    )}
+      <MessagesWrapper messages={dummyMessages} currentUser={name} />
 
-                    <p className="text-sm leading-5 text-[#111b21]">
-                      {message.message}
-                    </p>
-
-                    <div className="mt-1 flex justify-end">
-                      <time className="text-[11px] text-[#667781]">
-                        {message.createdAt}
-                      </time>
-                    </div>
-                  </article>
-                </li>
-              );
-            })}
-          </ol>
-        </div>
-      </section>
-
-      <section
-        aria-label="Compose a message"
-        className="border-t border-black/10 bg-[#f0f2f5] px-3 py-3 sm:px-4"
-      >
-        <div className="mx-auto w-full max-w-3xl">
-          <form className="flex items-end gap-2">
-            <label htmlFor="message-input" className="sr-only">
-              Type your message
-            </label>
-
-            <input
-              id="message-input"
-              type="text"
-              placeholder="Message as Ahsan"
-              autoComplete="off"
-              className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm outline-none placeholder:text-gray-400 focus:border-gray-400"
-            />
-
-            <button
-              type="button"
-              className="rounded-lg bg-[#f59e0b] px-4 py-3 text-sm font-medium text-white transition hover:opacity-90"
-            >
-              Send
-            </button>
-          </form>
-        </div>
-      </section>
+      <MessageComposer currentUser={name} />
     </main>
   );
 }
 
-export default ChatPage;
+export default ChatWrapperPage;
