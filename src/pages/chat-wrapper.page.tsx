@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 import bgImage from "@/assets/background.png";
 import { useUser } from "@/context/user.context";
@@ -32,6 +32,7 @@ const mergeUniqueMessages = (
 
 function ChatPage() {
   const { name } = useUser();
+  const [scrollToBottomSignal, setScrollToBottomSignal] = useState(0);
 
   const {
     data,
@@ -51,8 +52,9 @@ function ChatPage() {
     return mergeUniqueMessages([], allMessages);
   }, [data]);
 
-  const handleMessageSent = () => {
-    void refetch();
+  const handleMessageSent = async () => {
+    await refetch();
+    setScrollToBottomSignal((value) => value + 1);
   };
 
   const handleLoadOlderMessages = () => {
@@ -89,6 +91,7 @@ function ChatPage() {
         hasNextPage={Boolean(hasNextPage)}
         isFetchingNextPage={isFetchingNextPage}
         onLoadOlderMessages={handleLoadOlderMessages}
+        scrollToBottomSignal={scrollToBottomSignal}
       />
     );
   })();
@@ -119,7 +122,9 @@ function ChatPage() {
       </header>
 
       <NameModal />
+
       {content}
+
       <MessageComposer name={name} onMessageSent={handleMessageSent} />
     </main>
   );

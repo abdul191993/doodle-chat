@@ -9,6 +9,7 @@ type TMessagesWrapperProps = {
   hasNextPage: boolean;
   isFetchingNextPage: boolean;
   onLoadOlderMessages: () => void;
+  scrollToBottomSignal: number;
 };
 
 const SCROLL_TOP_THRESHOLD = 60;
@@ -19,6 +20,7 @@ const MessagesWrapper = ({
   hasNextPage,
   isFetchingNextPage,
   onLoadOlderMessages,
+  scrollToBottomSignal,
 }: TMessagesWrapperProps) => {
   const containerRef = useRef<HTMLElement | null>(null);
   const initialScrollDoneRef = useRef(false);
@@ -50,16 +52,24 @@ const MessagesWrapper = ({
       return;
     }
 
-    if (!isFetchingNextPage || previousScrollHeightRef.current === null) {
+    if (!isFetchingNextPage && previousScrollHeightRef.current !== null) {
+      const previousHeight = previousScrollHeightRef.current;
+      const nextHeight = container.scrollHeight;
+
+      container.scrollTop = nextHeight - previousHeight + container.scrollTop;
+      previousScrollHeightRef.current = null;
+    }
+  }, [messages, isFetchingNextPage]);
+
+  useEffect(() => {
+    const container = containerRef.current;
+
+    if (!container) {
       return;
     }
 
-    const previousHeight = previousScrollHeightRef.current;
-    const nextHeight = container.scrollHeight;
-
-    container.scrollTop = nextHeight - previousHeight;
-    previousScrollHeightRef.current = null;
-  }, [messages, isFetchingNextPage]);
+    container.scrollTop = container.scrollHeight;
+  }, [scrollToBottomSignal]);
 
   return (
     <section

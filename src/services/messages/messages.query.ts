@@ -33,5 +33,7 @@ export const useMessagesInfiniteQuery = (params?: TGetMessagesParams) => {
         before: pageParam ?? new Date().toISOString(),
       }).then(sortMessagesByCreatedAt),
     getNextPageParam: (lastPage) => getNextPageParam(lastPage, params?.limit),
+    refetchInterval: 5000,
+    refetchIntervalInBackground: true,
   });
 };
