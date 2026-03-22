@@ -33,7 +33,16 @@ const mergeUniqueMessages = (
 function ChatPage() {
   const { name } = useUser();
 
-  const { data, isLoading, isError, error, refetch } = useMessagesInfiniteQuery({
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useMessagesInfiniteQuery({
     limit: LATEST_MESSAGES_LIMIT,
   });
 
@@ -44,6 +53,14 @@ function ChatPage() {
 
   const handleMessageSent = () => {
     void refetch();
+  };
+
+  const handleLoadOlderMessages = () => {
+    if (!hasNextPage || isFetchingNextPage) {
+      return;
+    }
+
+    void fetchNextPage();
   };
 
   const content = (() => {
@@ -65,7 +82,15 @@ function ChatPage() {
       );
     }
 
-    return <MessagesWrapper messages={messages} name={name} />;
+    return (
+      <MessagesWrapper
+        messages={messages}
+        name={name}
+        hasNextPage={Boolean(hasNextPage)}
+        isFetchingNextPage={isFetchingNextPage}
+        onLoadOlderMessages={handleLoadOlderMessages}
+      />
+    );
   })();
 
   return (

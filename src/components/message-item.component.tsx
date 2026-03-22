@@ -1,4 +1,6 @@
 import type { TMessage } from "../models/messages.model";
+import { formatMessageTime } from "@/utils/format-message-time";
+import { parseMessageContent } from "@/utils/parse-message-content";
 import { normalizeUserName } from "@/utils/user-name";
 
 type TMessageItemProps = {
@@ -8,7 +10,12 @@ type TMessageItemProps = {
 
 const MessageItem = ({ message, name }: TMessageItemProps) => {
   const normalizedName = normalizeUserName(name);
-  const isOwnMessage = Boolean(normalizedName) && message.author === normalizedName;
+  const normalizedAuthor = normalizeUserName(message.author);
+  const isOwnMessage =
+    Boolean(normalizedName) && normalizedAuthor === normalizedName;
+
+  const parsedMessage = parseMessageContent(message.message);
+  const formattedTime = formatMessageTime(message.createdAt);
 
   return (
     <li className={`flex ${isOwnMessage ? "justify-end" : "justify-start"}`}>
@@ -24,11 +31,16 @@ const MessageItem = ({ message, name }: TMessageItemProps) => {
           </p>
         )}
 
-        <p className="text-sm leading-5 text-[#111b21]">{message.message}</p>
+        <p className="whitespace-pre-wrap wrap-break-word text-sm leading-5 text-[#111b21]">
+          {parsedMessage}
+        </p>
 
         <div className="mt-1 flex justify-end">
-          <time className="text-[11px] text-[#667781]">
-            {message.createdAt}
+          <time
+            className="text-[11px] text-[#667781]"
+            dateTime={message.createdAt}
+          >
+            {formattedTime}
           </time>
         </div>
       </article>
