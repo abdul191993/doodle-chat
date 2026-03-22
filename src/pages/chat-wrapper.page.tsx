@@ -1,38 +1,72 @@
+import { useMemo } from "react";
+
 import bgImage from "@/assets/background.png";
-import MessageComposer from "@/components/message-composer.component";
-import MessagesWrapper from "@/components/messages-wrapper.component";
-import NameModal from "@/components/name.modal";
 import { useUser } from "@/context/user.context";
+import MessagesWrapper from "../components/messages-wrapper.component";
+import MessageComposer from "../components/message-composer.component";
+import NameModal from "../components/name.modal";
+import { useMessagesInfiniteQuery } from "../services/messages/messages.query";
 
-const dummyMessages = [
-  {
-    _id: "1",
-    author: "John",
-    message: "Hey, welcome to Doodle Chat.",
-    createdAt: "22 Mar 2026 10:10",
-  },
-  {
-    _id: "2",
-    author: "Sarah",
-    message: "We need the frontend version to match exactly.",
-    createdAt: "22 Mar 2026 10:11",
-  },
-  {
-    _id: "3",
-    author: "Ahsan",
-    message: "Got it. I’ll rebuild the UI first.",
-    createdAt: "22 Mar 2026 10:12",
-  },
-  {
-    _id: "4",
-    author: "John",
-    message: "Perfect. Then we can wire up the API step by step.",
-    createdAt: "22 Mar 2026 10:13",
-  },
-];
+import type { TMessage } from "../models/messages.model";
 
-function ChatWrapperPage() {
+const LATEST_MESSAGES_LIMIT = 10;
+
+const sortMessagesByCreatedAt = (messages: TMessage[]) =>
+  [...messages].sort(
+    (a, b) =>
+      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+  );
+
+const mergeUniqueMessages = (
+  currentMessages: TMessage[],
+  incomingMessages: TMessage[]
+) => {
+  const merged = [...currentMessages, ...incomingMessages];
+
+  const uniqueMessages = merged.filter((message, index, self) => {
+    return index === self.findIndex((item) => item._id === message._id);
+  });
+
+  return sortMessagesByCreatedAt(uniqueMessages);
+};
+
+function ChatPage() {
   const { name } = useUser();
+
+  const { data, isLoading, isError, error, refetch } = useMessagesInfiniteQuery({
+    limit: LATEST_MESSAGES_LIMIT,
+  });
+
+  const messages = useMemo(() => {
+    const allMessages = data?.pages.flatMap((page) => page) ?? [];
+    return mergeUniqueMessages([], allMessages);
+  }, [data]);
+
+  const handleMessageSent = () => {
+    void refetch();
+  };
+
+  const content = (() => {
+    if (isLoading && !messages.length) {
+      return (
+        <div className="flex flex-1 items-center justify-center" role="status">
+          <p className="text-sm text-slate-600">Loading messages...</p>
+        </div>
+      );
+    }
+
+    if (isError && !messages.length) {
+      return (
+        <div className="flex flex-1 items-center justify-center" role="alert">
+          <p className="text-sm text-red-600">
+            {error instanceof Error ? error.message : "Failed to load messages."}
+          </p>
+        </div>
+      );
+    }
+
+    return <MessagesWrapper messages={messages} name={name} />;
+  })();
 
   return (
     <main
@@ -60,12 +94,10 @@ function ChatWrapperPage() {
       </header>
 
       <NameModal />
-
-      <MessagesWrapper messages={dummyMessages} currentUser={name} />
-
-      <MessageComposer currentUser={name} />
+      {content}
+      <MessageComposer name={name} onMessageSent={handleMessageSent} />
     </main>
   );
 }
 
-export default ChatWrapperPage;
+export default ChatPage;

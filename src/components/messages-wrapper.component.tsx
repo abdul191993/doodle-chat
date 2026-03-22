@@ -1,21 +1,12 @@
-import MessageItem from "@/components/message-item.component";
+import MessageItem from "./message-item.component";
+import type { TMessage } from "../models/messages.model";
 
-type Message = {
-  _id: string;
-  author: string;
-  message: string;
-  createdAt: string;
+type TMessagesWrapperProps = {
+  messages: TMessage[];
+  name: string;
 };
 
-type MessagesWrapperProps = {
-  messages: Message[];
-  currentUser: string;
-};
-
-function MessagesWrapper({
-  messages,
-  currentUser,
-}: MessagesWrapperProps) {
+const MessagesWrapper = ({ messages, name }: TMessagesWrapperProps) => {
   return (
     <section
       aria-label="Messages"
@@ -23,19 +14,19 @@ function MessagesWrapper({
     >
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-3">
         <ol className="flex flex-col gap-2" role="list">
-          {messages.map((item) => (
-            <MessageItem
-              key={item._id}
-              author={item.author}
-              message={item.message}
-              createdAt={item.createdAt}
-              isOwnMessage={item.author === currentUser}
-            />
+          {messages.map((message) => (
+            <MessageItem key={message._id} message={message} name={name} />
           ))}
         </ol>
+
+        {messages.length === 0 ? (
+          <p className="text-center text-sm text-slate-500">
+            No messages yet. Start the conversation.
+          </p>
+        ) : null}
       </div>
     </section>
   );
-}
+};
 
 export default MessagesWrapper;
